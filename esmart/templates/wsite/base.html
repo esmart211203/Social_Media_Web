@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <link rel="stylesheet" href="{% static "css/profile.css" %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    {% block import %}{% endblock import %}
+    <style>
+        #login{
+            margin: 0 10px;
+            text-decoration: none;
+            padding: 10px 20px;
+            background: #5F9EA0;
+            border-radius: 20px;
+            color: #FFF;
+        }
+    </style>
+    <title>Document</title>
+</head>
+<body>
+    <nav style="background: rgb(126,195,176)">
+        <div class="nav-left">
+            <a href="{% url "index" %}">
+                <img src="{% static "images/base/GCONv2.png" %}" style="width: 100%; height: 50px; object-fit: contain;" class="logo" alt="logo">
+            </a>
+            <ul>
+                <li>
+                    <a href="{% url "notification" %}">
+                        <img src="{% static "images/notification.png" %}" alt="">
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "chat" %}">
+                        <img src="{% static "images/inbox.png" %}" alt="">
+                    </a>
+                </li>
+                <li><img src="{% static "images/video.png" %}" alt=""></li>
+            </ul>
+        </div>
+        <div class="nav-right">
+            <form id="search-form" action="{% url 'search' %}" method="GET">
+                <div class="search-box">
+                    <img src="{% static "images/search.png" %}" alt="">
+                    <input type="text" name="keyword" placeholder="Tìm kiếm">
+                </div>
+            </form>
+            {% if request.user.is_authenticated %}
+                {% include "wsite/setting.html" %}
+            {% else %}
+                <a id="login" href="{% url "login" %}">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                </a>
+            {% endif %}
+    </nav>
+    {% block content %}
+    {% endblock content %}
+    <div class="footer">
+        Coppyright 2023 - Hope
+    </div>
+    <script src="{% static "js/app.js" %}"></script>
+</body>
+</html>

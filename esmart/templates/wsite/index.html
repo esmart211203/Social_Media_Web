@@ -1,0 +1,155 @@
+{% extends "wsite/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <div class="left-sidebar">
+        <div class="imp-links">
+            <a href="#"><img src="{% static "images/news.png" %}" alt="">Mới nhất</a>
+            <a href="{% url "friend-requests" %}"><img src="static/images/friends.png" alt="">Yêu cầu kết bạn</a>
+            <a href="{% url "create-group" %}"><img src="{% static "images/group.png" %}" alt="">Tạo nhóm</a>
+            <a href="{% url "create-page" %}"><img src="{% static "images/base/page-icon.png" %}" alt="">Tạo trang</a>
+            <a href="{% url "list-block" %}"><img src="{% static "images/base/block-icon.png" %}" alt="">Danh sách chặn</a>
+            <a href="#" style="color:rgb(126,195,176)">Xem thêm</a>
+          </div>
+        <div class="shortcut-links">
+            <p>Các nhóm của bạn</p> 
+            {% for groups in  groups %}
+                <a href="{% url "group-detail" groups.pk %}"><img src="{{ groups.group_pic.url }}" alt="{{ group.name }} Image">{{groups.name}}</a>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="main-content">
+        <!-- create_post -->
+        <div class="write-post-container">
+            <form method="POST" action="{% url 'add-post' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="user-profile">
+                    {% if request.user.is_authenticated %}
+                    <img src="{{ user_profile.profile_pic.url }}" alt="">
+                    {% else %}
+                    <img src="{% static "images/base/avatar.jpg" %}" alt="">
+                    {% endif %}
+                    <div>
+                        {% if request.user.is_authenticated %}
+                        <p>{{user.username}}</p>
+                        {% endif %}            
+                        <select name="status" style="border: none;">
+                            <option value="public" selected="selected">Mọi người</option>
+                            <option value="friend">Bạn bè</option>
+                            <option value="only_me">Chỉ mình tôi</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="post-input-container">
+                        <textarea name="content" rows="3" placeholder="Bạn đang nghĩ gì vậy?"></textarea>
+                        <div class="add-post-links">
+                            <a href="#"><img src="{% static "images/live-video.png" %}" alt="">Băng hình</a>
+                            <a href="#" onclick="document.getElementById('file-input').click();">
+                                <img src="{% static "images/photo.png" %}" alt=""> Hình 
+                            </a>
+                            <input id="file-input" name="image" type="file" style="display: none;">
+                            <a href="#"><img src="{% static "images/feeling.png" %}" alt=""> Cảm nhận/Hoạt động</a>
+                            <input type="submit" style="    
+                            padding: 8px 13px;
+                            border-radius: 10px;
+                            border: none;
+                            color: #fff;
+                            background: slategrey;
+                            cursor: pointer;" value="Post" />
+                        </div>
+                </div>
+            </form>
+                {% comment %} {{ form }} {% endcomment %}
+
+        </div>
+        <!-- post list -->
+        {% if has_friend_list %}
+            {% for data in arr_posts %}
+            <div class="post-container">
+                <div class="post-row">
+                    <div class="user-profile">
+                        <img src="{{ MEDIA_URL }}/{{ data.author.userprofileinfo.profile_pic }}" class="post-img" alt="">
+                        <div>
+                            {% if data.group %}
+                                <p>{{data.group.name}}</p>
+                            {% elif data.page %}
+                                <p>{{data.page.name}}</p>
+                            {% else %}
+                                <p>{{data.author}}</p>
+                            {% endif %}
+                            <span>{{data.created_at}}</span>
+                        </div>
+                    </div>
+                    <a href="#"><i class="fas fa-ellipsis-v"></i></a>
+                </div>
+                <p class="post-text">
+                    {% if data.status == 'public' %}
+                    Mọi người
+                    {% elif data.status == 'friend' %}
+                    Bạn bè
+                    {% else %}
+                    Chỉ mình tôi
+                    {% endif %}
+                    <a href="{% url "detail-post" data.pk %}"><span>{{data.content}}</span></a>
+                </p>
+                {% if data.image %}
+                <a href="{% url "detail-post" data.pk %}">
+                    <img src="{{ MEDIA_URL }}/{{ data.image }}" class="post-img" alt="{{data.content}}">
+                </a>  
+                {% endif %}
+                <div class="post-row">
+                    <div class="activity-icons">
+                        <div><img src="{% static "images/like-blue.png" %}">{{data.count_reacts}}</div>
+                        <div><img src="{% static "images/comments.png" %}">{{data.count_comment}}</div> 
+                        <div><img src="{% static "images/share.png" %}">0</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+        <button type="button" class="load-more-btn">Tải thêm</button>
+    </div>
+    <div class="right-sidebar">
+        {% if friend_requests %}
+            <div class="sidebar-title">
+                <h4>Yêu cầu kết bạn</h4>
+                <a href="{% url "friend-requests" %}">Xem tất cả <i class="fa-solid fa-caret-down"></i></a>
+            </div>
+            {% for data in friend_requests %}
+                <div class="event">
+                    <div class="left-event">
+                        <img src="{{ MEDIA_URL }}{{ data.sender.userprofileinfo.profile_pic }}" style="width: 100%; object-fit: cover;">
+                    </div>
+                    <div class="right-event">
+                        <h4>{{data.sender.username}}</h4>
+                        <p><i class="fa-solid fa-location-dot"></i> {{data.sender.personalinformation.residence}}</p>
+                        <a class="action" href="{% url "accept-friend-request" data.id %}">Accep</a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+        <div class="sidebar-title">
+            <h4 style="color:rgb(126,195,176)">Quảng cáo</h4>
+            <a style="color:rgb(126,195,176)" href="">Đóng</a>
+        </div>
+        <img src="{% static "images/advertisement.png" %}" class="sidebar-ads" alt="">
+        <div class="sidebar-title">
+            <h4 style="color:rgb(126,195,176)">Trang của bạn</h4>
+        </div>
+        {% for data in page %}
+        <div class="online-list">
+            <div class="online">
+                {% if data.page_profile_pic %}
+                    <img src="{{ data.page_profile_pic.url }}" alt="">
+                {% endif %}
+            </div>
+            <a href="{% url 'page' data.pk %}" style="text-decoration: none; color: #1876f2;">
+                <p>{{data.name}}</p>
+            </a>
+        </div>
+        {% endfor %}
+
+    </div>
+</div>
+{% endblock content %}
+

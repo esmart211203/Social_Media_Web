@@ -1,0 +1,43 @@
+{% load static %}
+
+<div class="nav-user-icon online" onclick="SettingMenuToggle()">
+    <img src="{{MEDIA_URL}}{{user.userprofileinfo.profile_pic}}" alt="">
+</div>
+</div>
+    <div class="settings-menu">
+    <div id="dark-btn" >
+        <span></span>
+    </div>
+    <div class="settings-menu-inner">
+        <div class="user-profile">
+            <img src="{{MEDIA_URL}}{{user.userprofileinfo.profile_pic}}" alt="">
+            <div>
+                <p>{{request.user.username}}</p>
+                <a href="{% url 'profile-user' request.user.id %}">Xem trang cá nhân</a>
+            </div>
+        </div>
+        <hr>
+        <div class="user-profile">
+            <img src="{% static "images/feedback.png" %}" alt="">
+            <div>
+                <p>Gửi phản hồi</p>
+                <a href="#">Hãy giúp chúng tôi cải tiến</a>
+            </div>
+        </div>
+        <hr>
+        <div class="settings-links">
+            <img src="{% static "images/setting.png" %}"  class="settings-icon" alt="">
+            <a href="{% url "s&f" %}">Cài đặt & Bảo mật<img src="{% static "images/arrow.png" %}" width="10px" alt=""></a>
+        </div>
+        <div class="settings-links">
+            <img src="{% static "images/help.png" %}"  class="settings-icon" alt="">
+            <a href="">Trợ giúp & Hỗ trợ<img src="{% static "images/arrow.png" %}" width="10px" alt=""></a>
+        </div>
+        <div class="settings-links">
+            <img src="{% static "images/logout.png" %}"  class="settings-icon" alt="">
+            <a href="{% url "logout" %}">Đăng xuất<img src="{% static "images/arrow.png" %}" width="10px" alt=""></a>
+        </div>
+    </div>
+</div>
+
+

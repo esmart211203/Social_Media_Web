@@ -1,0 +1,38 @@
+{% include "auth/base.html" %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">  
+
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mt-5 mb-5">
+    <h2 class="m-0">Danh sách province</h2>
+    <a href="{% url "province-create" %}" class="float-right btn btn-primary">Thêm</a>
+</div>
+<table class="table table-hover  bg-light ">
+  <thead >
+    <tr>
+      <th>STT</th>
+      <th>Name</th>
+      <th>Slug</th>
+      <th>Sua</th>
+      <th>Xoa</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for data in province %}
+        <tr>
+            <td>{{data.id}}</td>
+            <td>{{data.name}}</td>
+            <td>{{data.slug}}</td>
+            <td>
+                <a href="{% url "province-update" data.pk %}" class="btn btn-info">Edit</a>
+            </td>
+            <td>
+                <form method="POST" action="{% url "province-delete" data.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Xóa</button>
+                </form>
+            </td>
+        </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>

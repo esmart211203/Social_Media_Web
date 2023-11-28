@@ -1,0 +1,8 @@
+{% extends "auth/profile.html" %}
+{% block update_bio %}
+<form method="POST">
+    {% csrf_token %}
+    <input type="text" name="bio"/>
+    <button type="submit">Update Bio</button>
+</form>
+{% endblock update_bio %}

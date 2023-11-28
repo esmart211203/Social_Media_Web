@@ -1,0 +1,191 @@
+{% extends "chat/index.html" %}
+{% block content_chat %}
+<style>
+    .chat-img{
+        object-fit: cover;
+        max-width: 200px;
+    }
+</style>
+<div class="modal-dialog-scrollable">
+    <div class="modal-content">
+        <div class="msg-head">
+            <div class="row">
+                <div class="col-8">
+                    <div class="d-flex align-items-center">
+                        <span class="chat-icon"><img class="img-fluid" src="https://mehedihtml.com/chatbox/assets/img/arroleftt.svg" alt="image title"></span>
+                        <div class="flex-shrink-0">
+                            <img style="max-width: 50px;" src="{{ MEDIA_URL }}/{{receiver.userprofileinfo.profile_pic}}" alt="user img">
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h3>{{receiver.username}}</h3>
+                            <p>{{receiver.userprofileinfo.bio}}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <ul class="moreoption">
+                        <li class="navbar nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">Hoạt động</a></li>
+                                <li><a class="dropdown-item" href="#">Xóa</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="modal-body">
+            <div class="msg-body">
+                <ul id="ul-body">
+                    {% for data in chat_messages %}
+                        {% if data.msg_sender == user and data.msg_receiver == receiver %} 
+                        <li class="repaly">
+                            {% if data.img %}
+                                <img class="chat-img" src="{{ MEDIA_URL }}/{{data.img}}">
+                            {% endif %}
+                            <p>{{data.body}}</p>
+                            <span class="time">10:20 am</span>
+                        </li>
+                        {% elif data.msg_sender == receiver and data.msg_receiver == user  %}
+                        <li class="sender">
+                            {% if data.img %}
+                                <img class="chat-img" src="{{ MEDIA_URL }}/{{data.img}}">
+                            {% endif %}
+                            <p> {{data.body}} </p>
+                            <span class="time">10:06 am</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <style>
+            textarea {
+                height: 4em;
+            }
+        </style>
+        <div class="send-box" >
+            <form method="POST" id="myForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="send-btns">
+                    <div class="attach">
+                        <div class="button-wrapper">
+                            <span class="label">
+                                <img class="img-fluid" src="https://mehedihtml.com/chatbox/assets/img/upload.svg" alt="image title">Tập tin đính kèm
+                            </span><input type="file" name="upload" id="upload" class="upload-box" placeholder="Upload File" aria-label="Upload File">
+                        </div>
+                    </div>
+                </div>
+                {{forms.body}}
+                <button style="background: #7ec3b0;" type="submit"><i class="fa fa-paper-plane" aria-hidden="true" ></i>Gửi</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    var MEDIA_URL = "{{ MEDIA_URL }}";
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+    let form = document.getElementById("myForm");
+    let imageInput = document.getElementById("upload");
+    form.addEventListener("submit", sendChat)
+    function sendChat(e) {
+        e.preventDefault();
+        let ChatMessage = document.getElementById("id_body").value;
+        let imageFile = imageInput.files[0];
+    
+        let formData = new FormData();
+        formData.append("msg", ChatMessage);
+        formData.append("img", imageFile);
+    
+        let url = "{% url 'sent_msg' receiver.id %}";
+        fetch(url, {
+            method: "POST",
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+            body: formData,
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('success: ', data);
+                let chat_body = document.getElementById('ul-body');
+                let ChatMessageBox = document.createElement("li");
+                ChatMessageBox.classList.add("repaly");
+                // Tạo phần tử hình ảnh (nếu có)
+                if (data.img) {
+                    let imageElement = document.createElement("img");
+                    imageElement.classList.add("chat-img");
+                    imageElement.setAttribute("src", MEDIA_URL + data.img);
+                    ChatMessageBox.appendChild(imageElement);
+                    imageInput.value = "";
+                }
+                let messageParagraph = document.createElement("p");
+                messageParagraph.innerText = data.body;
+                ChatMessageBox.appendChild(messageParagraph);
+                chat_body.appendChild(ChatMessageBox);
+                document.getElementById('id_body').value = '';
+                document.getElementById('id_body').focus();
+            })
+            .catch((error) => {
+                console.error("Error ", error);
+            })
+    }
+    setInterval(ReceiveMessage, 3000);
+    let counter = {{num}};
+    function ReceiveMessage() {
+        let url = "{% url 'rec_msg' receiver.id %}";
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                console.log('success check: ', data);
+                if(data.length == 0){
+                }else{
+                    let lastMsg = data[data.length -1];
+                    if(counter == data.length ){
+                        console.log("there is no new chat");
+                    }else{
+                        let chat_body = document.getElementById('ul-body');
+                        let ChatMessageBox = document.createElement("li");
+                        ChatMessageBox.classList.add("sender");
+                        console.log("kiem tra", data[1]);
+                        let messageParagraph = document.createElement("p");
+                        messageParagraph.innerText = lastMsg.body;
+                        ChatMessageBox.appendChild(messageParagraph);
+                        if (lastMsg.img) {
+                            let imageElement = document.createElement("img");
+                            imageElement.classList.add("chat-img");
+                            imageElement.setAttribute("src", MEDIA_URL + lastMsg.img);
+                            ChatMessageBox.appendChild(imageElement);
+                            imageInput.value = "";
+                        }
+                        chat_body.appendChild(ChatMessageBox);
+                    }
+                }
+                counter = data.length
+            })
+            .catch((error) => {
+                console.error('error: ', error);
+            });
+    } 
+</script>
+{% endblock content_chat %}

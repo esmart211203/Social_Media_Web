@@ -1,0 +1,128 @@
+{% include "auth/base.html" %}
+{% load static %}
+<style>
+    #notification-container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      
+      .notification {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        background-color: #f6f6f6;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        padding: 10px;
+      }
+      
+      .notification:hover {
+        transform: scale(1.02);
+      }
+      
+      .notification-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
+      
+      .notification-content {
+        flex-grow: 1;
+      }
+      
+      .notification-text {
+        margin: 0;
+        font-weight: bold;
+      }
+      
+      .notification-timestamp {
+        font-size: 12px;
+        color: #888;
+      }
+      
+      .notification-divider {
+        border: none;
+        border-top: 1px solid #ccc;
+        margin: 10px 0;
+      }
+      h2{
+        text-align: center;
+        margin: 20px;
+      }
+</style>
+<h2>Thông báo</h2>
+<div id="notification-container">
+</div>
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+    document.addEventListener("DOMContentLoaded", function() {
+        ReceiveMessage();
+        setInterval(ReceiveMessage, 3000);
+      });
+    function ReceiveMessage() {
+        let url = "{% url 'get_notification' %}";
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                let notificationContainer = document.getElementById("notification-container");
+              
+                // Xóa các thông báo cũ
+                while (notificationContainer.firstChild) {
+                  notificationContainer.removeChild(notificationContainer.firstChild);
+                }
+              
+                // Thêm các thông báo mới
+                data.forEach(notification => {
+                  // Tạo phần tử thông báo
+                  let notificationElement = document.createElement("div");
+                  notificationElement.classList.add("notification");
+              
+                  // Tạo phần tử ảnh đại diện
+                  let avatarElement = document.createElement("img");
+                  avatarElement.src = "{% static 'images/noti.png' %}";
+                  avatarElement.alt = "abc";
+                  avatarElement.classList.add("notification-avatar");
+                  notificationElement.appendChild(avatarElement);
+              
+                  // Tạo phần tử nội dung thông báo
+                  let contentElement = document.createElement("div");
+                  contentElement.classList.add("notification-content");
+              
+                  let textElement = document.createElement("p");
+                  textElement.classList.add("notification-text");
+                  textElement.textContent = notification;
+                  contentElement.appendChild(textElement);
+              
+                  let timestampElement = document.createElement("span");
+                  timestampElement.classList.add("notification-timestamp");
+                  timestampElement.textContent = "";
+                  contentElement.appendChild(timestampElement);
+              
+                  notificationElement.appendChild(contentElement);
+              
+                  // Gắn phần tử thông báo vào container
+                  notificationContainer.appendChild(notificationElement);
+                });
+              })
+            .catch((error) => {
+                console.error('error: ', error);
+            });
+    }
+</script>

@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static "css/profile.css" %}">
+    <link rel="stylesheet" href="{% static "css/style1.css" %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    {% block import %}{% endblock import %}
+    <style>
+        #login{
+            margin: 0 10px;
+            text-decoration: none;
+            padding: 10px 20px;
+            background: #5F9EA0;
+            border-radius: 20px;
+            color: #FFF;
+        }
+    </style>
+    <title>Document</title>
+</head>
+<body>
+    <nav style="background: rgb(126,195,176);">
+        <div class="nav-left">
+            <a href="{% url "index" %}">
+                <img src="{% static "images/base/GCONv2.png" %}" style="width: 100%; height: 50px; object-fit: contain;" class="logo" alt="logo">
+            </a>
+        </div>
+    </nav>
+    {% block content %}
+    {% endblock content %}
+
+    <script src="{% static "js/app.js" %}"></script>
+</body>
+</html>

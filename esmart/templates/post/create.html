@@ -1,0 +1,8 @@
+{% extends "wsite/base.html" %}
+{% block content %}
+<form method="post" action="{% url "create-post" %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Create POST</button>
+  </form>
+{% endblock content %}

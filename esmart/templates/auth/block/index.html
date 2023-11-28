@@ -1,0 +1,21 @@
+{% extends 'wsite/base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static "css/block.css" %}">
+<h1 style="text-align: center; margin:20px 0;">Danh sách chặn</h1>
+    <div class="container">
+      {% if list_block|length > 0 %}
+      {% for data in list_block %}
+      <div class="card">
+        <img src="{{ MEDIA_URL }}/{{ data.block_user.userprofileinfo.profile_pic }}" alt="Avatar" class="avatar">
+          <div class="card-content">
+            <h4 class="name">{{ data.block_user }}</h4> <span>Bạn đã chặn người này</span>
+            <a href="{% url "un-block" data.block_user.id %}" class="btn">Bỏ chặn</a>
+          </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p style="margin-left: 200px;">Không có ai bị chặn</p>
+    {% endif %}
+    </div>
+{% endblock %}

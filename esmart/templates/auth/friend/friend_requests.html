@@ -1,0 +1,80 @@
+{% extends 'wsite/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+.container{
+    width: 700px;
+    margin: 0 auto;
+    background: #FFF;
+    display: flex;
+    flex-wrap: wrap;
+    border-radius: 10px;
+}
+.card {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border: 1px solid #e9ebee;
+  padding: 10px;
+  margin-bottom: 10px;
+  width: 500px;
+  border-radius: 15px;
+}
+
+.avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.card-content {
+  flex-grow: 1;
+}
+
+.name {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 5px 10px;
+  background-color: #7ec3b0;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 5px;
+}
+.btn:last-child {
+  display: inline-block;
+  padding: 5px 10px;
+  background-color: #ff3f3f;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 5px;
+}
+.btn:hover {
+  background-color: #1153b3;
+}
+</style> 
+<h1 style="text-align: center; margin:20px 0;">Yêu cầu kết bạn</h1>
+    <div class="container">
+      {% if  friend_requests%}
+      {% for data in friend_requests %}
+      <div class="card">
+        <img src="{{ MEDIA_URL }}{{ data.sender.userprofileinfo.profile_pic }}" alt="Avatar" class="avatar">
+          <div class="card-content">
+            <h4 class="name">{{data.sender}}</h4> <spam>Đã gửi lời mời yêu cầu kết bạn</spam>
+            <a href="{% url "accept-friend-request" data.id %}"class="btn">Kết bạn</a>
+            <a href="{% url "decline-request" data.id %}"class="btn">Hủy</a>
+          </div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <span style="margin-left: 180px;">
+        Bạn không có yêu cầu kết bạn nào
+      </span>
+      {% endif %}
+    </div>
+{% endblock %}

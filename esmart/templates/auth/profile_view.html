@@ -1,0 +1,286 @@
+{% extends "wsite/base.html" %}
+{% load static %}
+{% block content %}
+<style>
+    .cancel-link {
+        margin: 10px 0;
+        text-decoration: none;
+        color: #626262;
+        font-weight: bold;
+        font-size: 16px;
+        border: 1px solid #626262;
+        padding: 6px 12px;
+        border-radius: 4px;
+        background-color: #FFF;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+    .cancel-link:hover {
+        background-color: #626262;
+        color: #FFF;
+    }
+</style>
+<div class="profile-container">
+    <img src="{% static "images/cover.png" %}" alt="" class="cover-img">
+    <div class="profile-details">
+        <div class="pd-left">
+            <div class="pd-row">
+            {% if user_profile and user_profile.profile_pic %}
+                <img src="{{ user_profile.profile_pic.url }}" class="pd-images" alt="Profile Picture">
+            {% else %}
+                <img src="{% static 'images/base/avatar.jpg' %}" class="pd-images" alt="Profile Picture">
+            {% endif %}
+                <div>
+                    <h3>{{user.username}}</h3>
+                    <p style="margin-bottom: 10px;">{{total_friend_count}} Bạn bè</p>
+                    {% if not is_me %}
+                        {% if is_favorites %}
+                        <a href="{% url 'un-favorites-user' user.id %}" class="cancel-link">Hủy thích💔</a>
+                        {% else %}
+                            <a href="{% url "favorites-user" user.id %}" class="cancel-link">Yêu thích❤️</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <style>
+            #more{
+                text-align: center;
+                background: grey;
+                width: 100px;
+                position: absolute;
+                display: none;
+                right: 50%;
+                top: 100%;
+            }
+            #more ul li{
+                list-style: none;
+                cursor: pointer;
+            }
+            #more ul{
+                list-style-type: none;
+                padding: 0;
+                margin: 0;
+                background-color: #f9f9f9;
+                min-width: 120px;
+                box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+                z-index: 1;
+            }
+            #more ul li {
+                padding: 12px 16px;
+                cursor: pointer;
+            }
+            #more ul li a{
+                margin: 0;
+                padding: 0;
+                background: none;
+                color: #626262;
+                text-decoration: none;
+            }
+            #more ul li:hover {
+                background-color: #f1f1f1;
+            }
+        </style>
+        <div class="pd-right" style="position: relative;"> 
+            {% if not is_me %}
+                <div id="more">
+                    <ul>
+                        {% if is_friend %}
+                        <li>
+                            <a href="{% url "un-friend" user.id %}" >Hủy kết bạn</a>
+                        </li>
+                        {% else %}
+                        <li>
+                            <a href="{% url "send_friend_request" user.id %}" >Thêm bạn bè</a>
+                        </li>
+                        {% endif %}
+                        <li>
+                            <a href="{% url "block-user" user.id %}">Chặn</a>
+                        </li>
+                    </ul>
+                </div>
+                <br>
+                <img src="{% static "images/more.png" %}"  onclick="toggleMore()" style="cursor: pointer;" alt="more">
+            {% endif %}
+        </div>
+    </div>
+    <div class="profile-info">
+        <div class="info-col">
+            <div class="profile-intro">
+                <div style="display: flex;">
+                    <h3>phần giới thiệu</h3>
+                </div>
+                <p class="intro-text">{{user_profile.bio}}</p>
+                <hr>
+                {% if pim %}
+                <ul>
+                    <li><img src="{% static "images/profile-job.png" %}" alt="">{{pim.workplace}}</li>
+                    <li><img src="{% static "images/profile-study.png" %}" alt="">{{pim.degree}}</li>
+                    <li><img src="{% static "images/profile-home.png" %}" alt="">{{pim.home_town}}</li>
+                    <li><img src="{% static "images/location.png" %}" alt="">{{pim.residence}}</li>
+                </ul>
+                {% endif %}
+            </div>
+            <div class="profile-intro">
+                <div class="title-box">
+                    <h3>Bạn bè</h3>
+                    <a href="{% url "list_friend" %}" style="color: #7ec3b0">Tất cả bạn bè</a>
+                </div>
+                <p>{{ friends_data|length }}/{{ total_friend_count }} Bạn bè</p>
+                <div class="friends-box">
+                    {% if friends_data|length > 0 %}
+                        {% for friend_data in friends_data %}
+                        <div>
+                            {% if friend_data.profile_pic %}
+                            <a href="{% url "profile-user" friend_data.id %}">
+                                <img src="{{ friend_data.profile_pic }}" alt="{{ friend_data.name }}">
+                            </a>
+                            {% else %}
+                            <img src="{% static "images/photo2.png" %}" alt="">
+                            {% endif %}
+                            <p>
+                                {{ friend_data.name }}
+                            </p>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="post-col">
+            {% if is_me %}
+            <form method="POST" action="{% url 'add-post' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="write-post-container">
+                    <form method="POST" action="{% url 'add-post' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="user-profile">
+                            {% if request.user.is_authenticated %}
+                            <img src="{{ user_profile.profile_pic.url }}" alt="">
+                            {% else %}
+                            <img src="{% static "images/base/avatar.jpg" %}" alt="">
+                            {% endif %}
+                            <div>
+                                {% if request.user.is_authenticated %}
+                                <p>{{user.username}}</p>
+                                {% endif %}            
+                                <select name="status" style="border: none;">
+                                    <option value="public" selected="selected">Mọi người</option>
+                                    <option value="friend">Bạn bè</option>
+                                    <option value="only_me">Chỉ mình tôi</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="post-input-container">
+                                <textarea name="content" rows="3" placeholder="Bạn đang nghĩ gì vậy?"></textarea>
+                                <div class="add-post-links">
+                                    <a href="#"><img src="{% static "images/live-video.png" %}" alt="">Video</a>
+                                    <a href="#" onclick="document.getElementById('file-input').click();">
+                                        <img src="{% static "images/photo.png" %}" alt="">Hình ảnh
+                                    </a>
+                                    <input id="file-input" name="image" type="file" style="display: none;">
+                                    <a href="#"><img src="{% static "images/feeling.png" %}" alt="">Cảm nhận/Hoạt động</a>
+                                    <input type="submit" style="    
+                                    padding: 8px 13px;
+                                    border-radius: 10px;
+                                    border: none;
+                                    color: #fff;
+                                    background: #7ec3b0;
+                                    cursor: pointer;" value="Đăng" />
+                                </div>
+                        </div>
+                    </form>
+                        {% comment %} {{ form }} {% endcomment %}
+        
+                </div>
+            </form>
+            {% endif %}
+            <!-- post post_list-->
+            {% for data in post_list %}
+            <div class="post-container" style="position: relative;">
+                <div class="post-row">
+                    <div class="user-profile">
+                        {% if user_profile.profile_pic %}
+                        <img src="{{ user_profile.profile_pic.url }}" class="pd-images" alt="Profile Picture">
+                    {% else %}
+                        <img src="{% static 'images/base/avatar.jpg' %}" class="pd-images" alt="Profile Picture">
+                    {% endif %}
+                        <div>                        
+                            <p>{{data.author}}</p>
+                            <span>{{data.created_at}}</span>
+                        </div>
+                    </div>
+                    <style>
+                        .action{
+                            background: #BBBBBB;
+                            width: 100px;
+                            border-radius: 5px;
+                            position: absolute;
+                            top: 5%;
+                            right: 30px;
+                            display: none;
+                        }
+
+                        .action ul li{
+                            list-style: none;
+                            text-align: center;
+                            margin: 5px 0;
+                            color: #fff;
+                        }
+                        .action ul li a{
+                            color: #fff;
+                            text-decoration: none;
+                        }
+                    </style>
+                    <div id="{{data.id}}" class="action">
+                        <ul>
+                            <li>
+                                <a href="{% url "delete-post" data.id %}">Xóa</a>
+                            </li>
+                            <li>
+                                <a href="{% url "update-post" data.pk %}">Sửa</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <i class="fas fa-ellipsis-v" onclick="toggleAction('{{data.id}}')" style="cursor: pointer;"></i>
+                </div>
+                <p class="post-text">
+                    {% if data.status == 'public' %}
+                    Mọi người
+                    {% elif data.status == 'friend' %}
+                    Bạn bè
+                    {% else %}
+                    Chỉ mình tôi
+                    {% endif %}
+                    <span>
+                    <a href="{% url "detail-post" data.pk %}">{{data.content}}</a>
+                    </span>
+                </p>
+                {% if data.image %}
+                    <a href="{% url "detail-post" data.pk %}">
+                        <img src="{{ MEDIA_URL }}/{{ data.image }}" class="post-img" alt="{{data.content}}">
+                    </a>  
+                {% endif %}
+                <div class="post-row">
+                    <div class="activity-icons">
+                        <div class="react"><img src="{% static "images/like-blue.png" %}">{{data.count_reacts}}</div>
+                        <div><img src="{% static "images/comments.png" %}">{{data.count_comment}}</div>
+                        <div><img src="{% static "images/share.png" %}">0</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<script>
+    function toggleAction(actionId) {
+        var action = document.getElementById(actionId);
+        action.style.display = (action.style.display === "none") ? "block" : "none";
+    }
+    function toggleMore() {
+        var more = document.getElementById('more');
+        more.style.display = (more.style.display === "none") ? "block" : "none";
+    }
+</script>
+{% endblock %}

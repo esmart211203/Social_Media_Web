@@ -1,0 +1,271 @@
+{% include "auth/base.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Post Detail</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+      .post-image {
+          max-width: 350px;
+          height: auto;
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+      }
+  </style>
+  <style>
+    .comments-section {
+      margin-top: 1rem;
+    }
+    
+    .comment {
+      margin-bottom: 1.5rem;
+    }
+    
+    .comment-header {
+      display: flex;
+      align-items: center;
+    }
+    
+    .comment-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 1rem;
+    }
+    
+    .comment-author {
+      font-weight: bold;
+    }
+    
+    .comment-content {
+      margin-left: 50px;
+      position: relative;
+    }
+    
+    .reply {
+      margin-left: 2rem;
+    }
+    .comment-content a {
+      color: blue;
+      text-decoration: underline;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+  
+    /* CSS cho thẻ "small" */
+    .comment-content small {
+      color: gray;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+
+    .replyForm {
+      display: none;
+      margin-top: 10px;
+    }
+    
+    .replyForm input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    
+    .replyForm button {
+      margin-top: 5px;
+      padding: 4px 8px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .replyForm button:hover {
+      background-color: #0056b3;
+    }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+    }
+    
+    .profile-picture {
+      width: 50px;
+      height: 50px;
+    }
+    
+    .card-title {
+      margin-bottom: 0;
+    }
+    
+    .btn-primary {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 3px;
+    }
+    
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+    
+    .d-flex {
+      display: flex;
+      align-items: center;
+    }
+    
+    .ml-3 {
+      margin-left: 10px;
+    }
+    
+    .mt-2 {
+      margin-top: 5px;
+    }
+    
+    .mt-3 {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col-md-9">
+              <div class="card">
+                    <div class="card-header">
+                        <img src="{{ post.author.userprofileinfo.profile_pic.url }}" style="width: 50px;" class="author-image" alt="Author Image">
+                        <span class="author-name">{{ post.author.username }}</span>
+                        <span style="float:right">Phản ứng: {{post.count_reacts}}</span>
+                    </div>
+                    <div class="card-body">
+                      <div class="content-area">
+                          <h5 class="card-title">{{ post.content }}</h5>
+                          {% if post.image %}
+                          <img src="{{ MEDIA_URL }}/{{ post.image }}" class="card-img-top post-image" alt="Post Image">
+                          {% endif %}
+                      </div>
+                        <hr>
+                        {% if is_react %}
+                        <a class="btn btn-link" href="{% url 'un_react' post.id %}">
+                          <i class="far fa-thumbs-down"></i> Bỏ thích
+                        </a>
+                        {% else %}
+                          <div class="post-react-bar react-app">
+                              <a class="btn btn-link" href="{% url 'react-like' post.id %}">
+                                  <i class="fas fa-thumbs-up"></i> Thích
+                              </a>
+                              <a class="btn btn-link" href="{% url 'react-favorites' post.id %}">
+                                  <i class="fas fa-heart"></i> Yêu thích
+                              </a>
+                              <a class="btn btn-link" href="{% url 'react-angry' post.id %}">
+                                  <i class="fas fa-angry"></i> Phẫn nộ
+                              </a>
+                              <a class="btn btn-link" href="{% url 'react-sad' post.id %}">
+                                  <i class="fas fa-sad-tear"></i> Buồn
+                              </a>
+                          </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mt-1">
+                    <h3>Bình luận</h3>
+                    {% for comment in comments %}
+                    {% if not comment.parent_comment %}
+                    <div class="comments-section">
+                      <div class="comment">
+                        <div class="comment-header">
+                          <img src="{{ MEDIA_URL }}/{{ comment.author.userprofileinfo.profile_pic }}" class="comment-avatar" alt="User Avatar">
+                          <span class="comment-author">{{comment.author.username}}</span>
+                        </div>
+                        <div class="comment-content">
+                          <p style="margin-bottom: 0; margin-left: 6px;">{{comment.content}}</p>
+                          <small>{{comment.created_at}}</small> <a onclick="toggleReplyForm('{{comment.id}}')">Trả lời</a> 
+                          {% if comment.author == request.user and request.user.is_authenticated %}<a onclick="toggleEditForm('edit/{{comment.id}}')">Sửa</a>{% endif %}
+                          {% if comment.author == request.user or post.author == request.user%}<a href="{% url "del_cmt" post.id comment.id %}" style="text-decoration: none;color: #212529;">Xóa</a>{% endif %}
+                          <form id="{{comment.id}}" action="{% url 'repply-comment' comment.id %}" class="replyForm" method="POST" style="display: none;">
+                            {% csrf_token %}
+                            <input type="text" name="content">
+                            <button type="submit" style="background: #7ec3b0;border:none;">Trả lời</button>
+                          </form>
+                          <form id="edit/{{ comment.id}}" action="{% url 'edit-comment' comment.id %}" class="replyForm" method="POST" style="display: none;">
+                            {% csrf_token %}
+                            <input type="text" name="content" value="{{ comment.content }}">
+                            <button type="submit" style="background: #7ec3b0;border:none;">Cập nhật</button>
+                          </form>
+                        </div>
+                        {% for child_comment in comments %}
+                          {% if child_comment.parent_comment_id == comment.id %}
+                            <div class="reply">
+                              <div class="comment-header">
+                                <img src="{{ MEDIA_URL }}/{{ child_comment.author.userprofileinfo.profile_pic }}" class="comment-avatar" alt="User Avatar">
+                                <span class="comment-author">{{child_comment.author.username}}</span>
+                              </div>
+                              <div class="comment-content">
+                                <p style="margin-bottom: 0;margin-left:5">{{child_comment.content}}</p>
+                                <small>{{child_comment.created_at}}</small> 
+                                {% if comment.author == request.user and request.user.is_authenticated %}<a onclick="toggleEditForm('edit/{{comment.id}}')">Sửa</a>{% endif %}
+                                {% if comment.author == request.user or post.author == request.user%}<a href="{% url "del_cmt" post.id child_comment.id %}" style="text-decoration: none;color: #212529;">Xóa</a>{% endif %}
+                                <form id="{{child_comment.id}}"  action="{% url 'edit-comment' child_comment.id %}" class="replyForm" method="POST" style="display: none;">
+                                  {% csrf_token %}
+                                  <input type="text" name="content" value="{{child_comment.content}}">
+                                  <button type="submit" style="background: #7ec3b0;border:none;">Cập nhật</button>
+                                </form>
+                              </div>
+                            </div>
+                          {% endif %}
+                        {% endfor %} 
+                      </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="mt-4">
+                  <h3>Thêm bình luận</h3>
+                  <form method="POST" action="{% url 'comment' post.pk  %}">
+                    {% csrf_token %}
+                      <div class="form-group">
+                          <textarea class="form-control" name="content" rows="3" placeholder="Bình luận của bạn"></textarea>
+                      </div>
+                      <button type="submit" class="btn btn-primary" style="background: #7ec3b0;border:none;">Gửi</button>
+                  </form>
+                </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card">
+                <h3 class="text-center">Gợi ý kết bạn</h3>
+                {% for data in suggested_users %}
+                <div class="card mb-3">
+                  <div class="d-flex align-items-center">
+                    <img src="{{ MEDIA_URL }}/{{ data.userprofileinfo.profile_pic }}" class="rounded-circle profile-picture" alt="Profile Picture" style="width: 50px; height: 50px; margin-right: 10px;">
+                    <h5 style="margin: 0;">
+                      <a href="{% url "profile-user" data.id %}" style="color: #7ec3b0">{{data.username}}</a>
+                    </h5>
+                  </div>
+                </div>
+              {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script>
+      function toggleReplyForm(formId) {
+        var replyForm = document.getElementById(formId);
+        replyForm.style.display = (replyForm.style.display === "none") ? "block" : "none";
+      }
+      function toggleEditForm(formId) {
+        var editForm = document.getElementById(formId);
+        editForm.style.display = editForm.style.display === "none" ? "block" : "none";
+      }
+    </script>
+</body>
+</html>

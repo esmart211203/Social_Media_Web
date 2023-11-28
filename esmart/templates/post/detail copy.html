@@ -1,0 +1,145 @@
+{% include "auth/base.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Post Detail</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+      .post-image {
+          max-width: 350px;
+          height: auto;
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+      }
+  </style>
+</head>
+<body>
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col-md-8">
+              {% comment %} <h3>Co the biet</h3> {% endcomment %}
+                <div class="card">
+                  <span>author: {{post.author}}</span>
+                  <h5 class="card-title">{{post.content}}</h5>
+                    {% if post.image %}
+                    <img src="{{ MEDIA_URL }}/{{ post.image }}" class="card-img-top post-image" alt="Post Image">
+                    {% endif %}
+                    <div class="card-body">
+                        <hr>
+                        <div class="post-react-bar react-app">
+                          <a class="btn btn-link" href="{% url "react-like" post.id %}">
+                            <i class="fas fa-thumbs-up"></i> Thích
+                          </a>
+                          <a class="btn btn-link" href="{% url "react-favorites" post.id %}" >
+                            <i class="fas fa-heart"></i> Yêu thích
+                          </a>
+                          <a class="btn btn-link"  href="{% url "react-angry" post.id %}">
+                            <i class="fas fa-angry"></i> Phẫn nộ  
+                          </a>
+                          <a class="btn btn-link" href="{% url "react-sad" post.id %}">
+                            <i class="fas fa-sad-tear"></i> Buồn
+                          </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h3>Comments</h3>
+                    {% for comment in comments %}
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">{{comment.author}}</h6>
+                            <small>{{comment.created_at}}</small>
+                            {% if comment.parent_comment %}
+                                <h6 class="card-subtitle mb-2 text-muted">reply: {{ comment.parent_comment }}</h6>
+                            {% endif %}
+                            <p class="card-text comment-content">{{comment.content}}</p>
+                            <button class="reply btn btn-link p-0"><i class="fa-solid fa-comment-dots"></i></button>
+                            <form class="comment-form reply-form" style="display: none;" method="POST" action="{% url 'repply-comment' comment.id %}">
+                                {% csrf_token %}
+                                <textarea class="edit-input form-control" name="content"></textarea>
+                                <button type="submit" class="btn btn-primary mt-1">Reply</button>
+                            </form>
+                            <div class="comment-icons">
+                                <a href="#" class="comment-icon edit-icon"><i class="fas fa-edit"></i></a>
+                                <form method="post" class="d-inline" action="{% url 'delete-comment' comment.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-link p-0">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+                <div class="mt-4">
+                  <h3>Add a Comment</h3>
+                  <form method="POST" action="{% url 'comment' post.pk  %}">
+                    {% csrf_token %}
+                      <div class="form-group">
+                          <textarea class="form-control" name="content" rows="3" placeholder="Your comment"></textarea>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                  </form>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <h3 class="card-body">People You May Know</h3>
+                <div class="card mb-3">
+                  <div class="card-body">
+                      <div class="d-flex align-items-center">
+                          <img src="{% static "images/profile.png" %}" class="rounded-circle profile-picture" alt="Profile Picture" style="width: 50px; height: 50px;">
+                          <div class="ml-3">
+                              <h5 class="card-title mb-0">Do Xuan Trong</h5>
+                              <button class="btn btn-primary mt-2">Add Friend</button>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const editIcons = document.querySelectorAll('.edit-icon');
+      
+        editIcons.forEach(function(icon) {
+          icon.addEventListener('click', function(event) {
+            event.preventDefault();
+      
+            const cardBody = icon.closest('.card-body');
+            const commentContent = cardBody.querySelector('.comment-content');
+            const commentForm = cardBody.querySelector('.comment-form');
+            const editInput = commentForm.querySelector('.edit-input');
+      
+            editInput.value = commentContent.textContent;
+            commentContent.style.display = 'none';
+            commentForm.style.display = 'block';  
+          });
+        });
+      });
+      document.addEventListener('DOMContentLoaded', function() {
+        const replyButtons = document.querySelectorAll('.reply');
+      
+        replyButtons.forEach(function(button) {
+          button.addEventListener('click', function(event) {
+            event.preventDefault();
+      
+            const cardBody = button.closest('.card-body');
+            const commentForm = cardBody.querySelector('.reply-form');
+      
+            commentForm.style.display = 'block';
+            button.style.display = 'none';
+          });
+        });
+      });
+    </script>
+</body>
+</html>

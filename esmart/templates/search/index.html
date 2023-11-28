@@ -1,0 +1,189 @@
+{% extends "wsite/base.html" %}
+{% load static %}
+{% block content %}
+<style>
+    .containerr{
+        width: 700px;
+        background: #fff;
+        margin: 10px auto;
+        border-radius: 10px;
+        padding-bottom: 10px;
+
+    }
+    .containerr h1{
+        text-align: center;
+        padding: 20px;
+    }
+    .card {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        width: 500px;
+        margin: 0 auto;
+        background: rgb(239 242 245);
+        margin-bottom: 20px;
+      }
+      .avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin-right: 15px;
+      }
+      
+      .card-content {
+        margin-left: 10px;
+      }
+      
+      .name {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 20px;
+      }
+      
+      .location {
+        font-size: 14px;
+        color: #888;
+      }
+      
+      .btn {
+        padding: 5px 10px;
+        background-color: #7ec3b0;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      {% comment %} group {% endcomment %}
+      .group-card {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        width: 500px;
+        margin: 0 auto;
+        margin-bottom: 20px;
+        background: rgb(239 242 245);
+      }
+      
+      .group-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+      }
+      
+      .group-card-content {
+        flex-grow: 1;
+        margin-left: 10px;
+        text-align: center;
+      }
+      
+      .group-name {
+        font-size: 18px;
+        font-weight: bold;
+      }
+      
+      .group-description {
+        font-size: 14px;
+        color: #888;
+        margin: 10px;
+      }
+      
+      .group-join-button {
+        padding: 5px 10px;
+        background-color: #7ec3b0;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        margin-top: 10px;
+        text-decoration: none;
+      }
+</style>
+<div class="containerr">
+    {% if is_authenticated %}
+    <h1>Mọi người</h1>
+    {% for data in users %}
+        <div class="card">
+            <img src="{{MEDIA_URL}}{{data.userprofileinfo.profile_pic}}" alt="Avatar" class="avatar">
+            <div class="card-content">
+              <h4 class="name">
+                <a href="{% url "profile-user" data.id %}" style="text-decoration: none;">
+                {{data.username}}
+              </a>
+              </h4>
+            <a href="{% url "send_friend_request" data.id %}"class="btn">Kết bạn</a>
+            </div>
+        </div>
+    {% endfor %}
+    <hr id="hr">
+    <h1>Các nhóm</h1>
+    {% for data in groups %}
+        <div class="group-card">
+            <img src="{{MEDIA_URL}}{{data.group_pic}}" alt="Group Image" class="group-image">
+            <div class="group-card-content">
+            <h4 class="group-name">{{data.name}}</h4>
+            <p class="group-description">{{data.description}}</p>
+            <a href="{% url "r-j-group" data.id %}" class="group-join-button">Tham gia</a>
+            </div>
+        </div>
+    {% endfor %}
+    <hr id="hr">
+    <h1>Các Page</h1>
+    {% for data in pages %}
+    <div class="group-card">
+      <img src="{{MEDIA_URL}}{{data.page_profile_pic}}" alt="Group Image" class="group-image">
+      <div class="group-card-content">
+      <h4 class="group-name">
+        <a href="{% url "page" data.pk %}" style="text-decoration: none;">
+          {{data.name}}
+        </a>
+      </h4>
+      <p class="group-description">{{data.category}}</p>
+      </div>
+  </div>
+    {% endfor %}
+    {% comment %} is not authenticated {% endcomment %}
+    {% else %}
+    <h1>Mọi người</h1>
+    {% for data in all_user %}
+        <div class="card">
+          <img src="{{MEDIA_URL}}{{data.userprofileinfo.profile_pic}}" alt="Avatar" class="avatar">
+            <div class="card-content">
+            <h4 class="name">{{data.username}}</h4>
+            <a href="{% url "send_friend_request" data.id %}"class="btn">Kết bạn</a>
+        </div>
+    {% endfor %}
+    <hr id="hr">
+    <h1>Các nhóm</h1>
+    {% for data in all_group %}
+        <div class="group-card">
+          <img src="{{MEDIA_URL}}{{data.group_pic}}" alt="Group Image" class="group-image">
+            <div class="group-card-content">
+            <h4 class="group-name">{{data.name}}</h4>
+            <p class="group-description">{{data.description}}</p>
+            <button class="group-join-button">Tham gia</button>
+            </div>
+        </div>
+    {% endfor %}
+    <hr id="hr">
+      <h1>Các Page</h1>
+      {% for data in all_page %}
+          <div class="group-card">
+            <img src="{{MEDIA_URL}}{{data.page_profile_pic}}" alt="Group Image" class="group-image">
+            <div class="group-card-content">
+            <h4 class="group-name">
+              <a href="{% url "page" data.pk %}" style="text-decoration: none;">
+                {{data.name}}
+              </a>
+            </h4>
+            <p class="group-description">{{data.category}}</p>
+            </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+</div>
+{% endblock content %}
