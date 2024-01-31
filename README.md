@@ -1,7 +1,7 @@
 # DỰ ÁN WEB TRUYỀN THÔNG XÃ HỘI
 
 ## CLICK DEMO ONLINE DỰ ÁN
-[Click vào đây để xem oneline] (https://gconmedia.pythonanywhere.com/)
+[Click vào đây để xem oneline] (https://gconmedia.pythonanywhere.com)
 
 
 ### DJANGO WEB LÀ GÌ ?
